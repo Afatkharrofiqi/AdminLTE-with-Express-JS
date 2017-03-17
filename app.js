@@ -4,6 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var flash = require('express-flash');
+var session = require('express-session');
+var mongoose = require('mongoose');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -21,6 +24,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({secret:"awdasd123"}));
+app.use(flash());
 
 app.use('/', index);
 app.use('/users', users);
@@ -32,6 +37,12 @@ app.use(function(req, res, next) {
   next(err);
 });
 
+// setting MongoDB dengan mongoose
+var user = require('./models/user');
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/organo');
+
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -41,6 +52,28 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
+});
+
+// development error handler
+// will print stacktrace
+if(app.get('env') == 'development'){
+  app.use(function(err,req,res,next){
+    res.status(err.status || 500);
+    res.render('error',{
+      message: err.message,
+      error: err
+    });
+  });
+}
+
+// production error handler
+// no stacktrace leaked to user
+app.use(function(err,req,res,next){
+  res.status(err.status || 500);
+  res.render('error',{
+    message: err.message,
+    error: {}
+  });
 });
 
 module.exports = app;

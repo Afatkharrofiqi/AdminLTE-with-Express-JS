@@ -1,5 +1,11 @@
 var express = require('express');
+var crypto = require('crypto');
+var User = require('../models/user');
+var Auth_mdw = require('../middlewares/auth');
+
 var router = express.Router();
+var secret = 'achmadfatkharrofiqi';
+var session_store;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
