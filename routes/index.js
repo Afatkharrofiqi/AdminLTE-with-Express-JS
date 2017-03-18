@@ -7,71 +7,51 @@ var router = express.Router();
 var secret = 'achmadfatkharrofiqi';
 var session_store;
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Achmad Fatkharrofiqi' });
-});
-
-router.get('/demo1', function(req, res, next){
-  res.render('demo1',{
-    message: 'Lorem ipsum sit dolot amet',
-    user: {name: 'Achmad', email: 'achmadfatkharrofiqi404@gmail.com', website: 'http://readme.my.id'}
+router.get('/',Auth_mdw.check_login, function(req,res,next){
+  session_store = req.session;
+  res.render('index', {
+    title: 'Achmad Fatkharrofiqi Express.js Blog Series', session_store:session_store
   });
 });
 
-router.get('/demo2/(:id)/(:category)', function(req,res,next){
-  res.render('demo2',{
-    id: req.params.id,
-    category: req.params.category
-  });
+router.get('/login',function(req,res,next){
+  res.render('login');
 });
 
-router.get('/demo3',function(req,res,next){
-  res.json({
-    message: 'Lorem ipsum sit dolot amet',
-    user: {name: 'Achmad', email: 'achmadfatkharrofiqi404@gmail.com', website: 'http://readme.my.id'}
-  });
+router.post('/login', function(req,res,next){
+  session_store = req.session;
+  var password = crypto.createHmac('sha256', secret)
+                    .update(req.param('password'))
+                    .digest('hex');
+  if (req.param('username') == "" || req.param('password') == ""){
+    req.flash('info', 'Maaf, tidak boleh ada field yang kosong!');
+    res.redirect('/login');
+  }else{
+    User.find({username: req.param('username'),password:password}, function(err,user){
+      if(err) throw err;
+      if(user.length > 0){
+        session_store.username = user[0].username;
+        session_store.email = user[0].email;
+        session_store.admin = user[0].admin;
+        session_store.logged_in = true;
+
+        res.redirect('/');
+      }else{
+        req.flash('info', 'Maaf, akun anda tidak ditemukan!');
+        res.redirect('/login');
+      }
+    });
+  }                    
 });
 
-router.get('/demo4',function(req,res,next){
-  res.render('demo4')
-});
-
-router.post('/demo4/',function(req,res,next){
-  res.json({
-    message: "request POST is executed",
-    data: {
-      username: req.param('username'),
-      email: req.param('email'),
-      website: req.param('website'),
-      phone: req.param('phone')
+router.get('/logout', function(req, res, next){
+  req.session.destroy(function(err){
+    if(err){
+      console.log(err);
+    }else{
+      res.redirect('/login');
     }
   });
 });
 
-router.put('/demo5/', function(req,res,next){
-  res.json({
-    message: "request PUT is executed",
-    data: {
-      username: req.param('username'),
-      email: req.param('email'),
-      website: req.param('website'),
-      phone: req.param('phone')
-    }
-  })
-});
-
-router.delete('/demo6/',function(req,res,next){
-  res.json({
-    message: "request DELETE is executed"
-  });
-});
-
-router.get('/demo7',function(req,res,next){
-  res.redirect('/demo7_result');
-}); 
-
-router.get('/demo7_result',function(req,res,next){
-  res.render('demo7');
-});
 module.exports = router;
