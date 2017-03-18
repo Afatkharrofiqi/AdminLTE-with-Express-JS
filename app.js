@@ -6,7 +6,9 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var flash = require('express-flash');
 var session = require('express-session');
+var expressValidator = require('express-validator')
 var mongoose = require('mongoose');
+var methodOverride = require('method-override');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -26,6 +28,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret:"rahasia1234"}));
 app.use(flash());
+app.use(expressValidator());
+app.use(methodOverride(function(req,res){
+  if(req.body && typeof req.body == 'object' && '_method' in req.body){
+    var method = req.body._mehthod;
+    detele req.body._method;
+    return method;
+  }
+}));
 
 app.use('/', index);
 app.use('/users', users);
