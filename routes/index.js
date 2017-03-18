@@ -18,6 +18,7 @@ router.get('/login',function(req,res,next){
   res.render('login');
 });
 
+// Login method POST to check username and password in the database
 router.post('/login', function(req,res,next){
   session_store = req.session;
   var password = crypto.createHmac('sha256', secret)
@@ -44,6 +45,7 @@ router.post('/login', function(req,res,next){
   }                    
 });
 
+// Logout
 router.get('/logout', function(req, res, next){
   req.session.destroy(function(err){
     if(err){
@@ -51,6 +53,14 @@ router.get('/logout', function(req, res, next){
     }else{
       res.redirect('/login');
     }
+  });
+});
+
+// Secret 
+router.get('/secret', Auth_mdw.check_login, Auth_mdw.is_admin, function(req,res,next){
+  session_store = req.session;
+  res.render('secret', {
+    session_store:session_store
   });
 });
 
