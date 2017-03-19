@@ -82,7 +82,7 @@ router.post('/add', Auth_mdw.check_login, Auth_mdw.is_admin, function(req, res, 
                 });
             }
         });
-    }else{
+    }else{ 
         // Showing error message
         errors_detail = "<p>Maaf, sepertinya ada salah pengisian!</p><ul>";
 
